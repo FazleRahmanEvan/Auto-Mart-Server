@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require ('cors');
+const jwt = require ('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
@@ -19,6 +20,8 @@ async function run(){
     try{
         await client.connect();
         const productCollection = client.db('autoMart').collection('products');
+        const orderCollection = client.db('autoMart').collection('orders');
+        const userCollection = client.db('autoMart').collection('user');
         
         app.get('/product', async(req,res)=>{
                         
@@ -34,6 +37,29 @@ async function run(){
             const product =await productCollection.findOne(query);
             res.send(product);
         })
+
+        app.put('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user
+            }
+
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+            res.send({ result, token });
+
+        })
+          
+        app.get('/orders', async(req, res)=>{
+            const email = req.query.email
+            const query = {email:email};
+            const myOrders = await orderCollection.find(query).toArray();
+            res.send(myOrders)
+        })
+
         app.post('/orders', async (req, res) => {
 
             const orders = req.body;
