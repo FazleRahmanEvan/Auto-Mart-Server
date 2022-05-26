@@ -34,7 +34,22 @@ async function run(){
             const product =await productCollection.findOne(query);
             res.send(product);
         })
+        app.post('/orders', async (req, res) => {
 
+            const orders = req.body;
+            const result = await orderCollection.insertOne(orders);
+            res.send(result)
+        })
+
+        // getting all orders according to individual email address 
+        app.get('/orders', async (req, res) => {
+
+            const email = req.query.email
+            const query = { email: email }
+            const cursor = orderCollection.find(query)
+            const myOrders = await cursor.toArray()
+            res.send(myOrders);
+        })
 
     }
     finally{
