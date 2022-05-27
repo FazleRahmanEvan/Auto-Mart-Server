@@ -37,10 +37,15 @@ function verifyJWT(req, res, next) {
 async function run(){
   
     try{
+
+
         await client.connect();
         const productCollection = client.db('autoMart').collection('products');
         const orderCollection = client.db('autoMart').collection('orders');
         const userCollection = client.db('autoMart').collection('user');
+
+
+
         
         app.get('/product', async(req,res)=>{
                         
@@ -57,6 +62,21 @@ async function run(){
             res.send(product);
         })
 
+        app.get('/user', verifyJWT, async (req, res) => {
+            const user = await userCollection.find().toArray();
+            res.send(user);
+        })
+
+        app.put('/user/admin/:email',verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const updateDoc = {
+                $set: {role:'admin'},
+            }
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result);
+
+        })
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
@@ -71,10 +91,7 @@ async function run(){
 
         })
 
-        app.get('/user', async (req, res) => {
-            const user = await userCollection.find().toArray();
-            res.send(user);
-        })
+     
           
         app.get('/orders', verifyJWT, async(req, res)=>{
             const email = req.query.email;
