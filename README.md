@@ -1,4 +1,8 @@
-## Auto Mart Client Server
+# Auto Mart Client Server
 
-# Node is used in backend side server
-# Jsonweb Token 
+## Technologies Used:
+### Node 
+### Jsonweb Token 
+### Express
+### mongodb
+### cors
