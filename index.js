@@ -43,7 +43,7 @@ async function run(){
         const productCollection = client.db('autoMart').collection('products');
         const orderCollection = client.db('autoMart').collection('orders');
         const userCollection = client.db('autoMart').collection('user');
-        const partsCollection = client.db('autoMart').collection('parts');
+        const reviewCollection = client.db('autoMart').collection('reviews');
 
 
         const verifyAdmin = async (req, res, next) => {
@@ -94,10 +94,27 @@ async function run(){
         });
 
 
+        app.post('/review', async (req, res) => {
+            const query = req.body;
+            const review = await reviewCollection.insertOne(query);
+            res.send(review);
+        });
+
+      
+        app.get('/review', async (req, res) => {
+            const query = {};
+            const review = await reviewCollection.find(query).toArray();
+            res.send(review);
+
+        })
+
+
+
         app.get('/user', verifyJWT, async (req, res) => {
             const user = await userCollection.find().toArray();
             res.send(user);
         })
+
 
 
         app.get('/admin/:email', async(req,res) => {
@@ -175,7 +192,7 @@ async function run(){
             res.send(result)
         })
 
-        // getting all orders according to individual email address 
+      
         app.get('/orders', async (req, res) => {
 
             const email = req.query.email
