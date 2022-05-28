@@ -46,6 +46,17 @@ async function run(){
         const partsCollection = client.db('autoMart').collection('parts');
 
 
+        const verifyAdmin = async (req, res, next) => {
+            const requester = req.decoded.email;
+            const requesterAccout = await userCollection.findOne({ email: requester });
+            if (requesterAccout.role === 'admin') {
+                next();
+            }
+            else {
+                res.status(403).send({ message: 'forbidden' });
+            }
+
+        }
 
         
         app.get('/product', async(req,res)=>{
@@ -55,9 +66,13 @@ async function run(){
         const products = await cursor.toArray();
         res.send(products);
         });
-
         
-        app.post('/product',  async (req, res) => {
+        app.get('/product/add', async (req, res) => {
+            const parts = await partsCollection.find().toArray();
+            res.send(parts);
+        })
+        
+        app.post('/product',verifyJWT,verifyAdmin,  async (req, res) => {
             const products = req.body;
             const result = await productCollection.insertOne(products);
             res.send(result);
@@ -69,6 +84,15 @@ async function run(){
             const product =await productCollection.findOne(query);
             res.send(product);
         })
+
+
+        app.delete('/product/:email', verifyJWT, verifyAdmin, async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const result = await productCollection.deleteOne(filter);
+            res.send(result);
+        });
+
 
         app.get('/user', verifyJWT, async (req, res) => {
             const user = await userCollection.find().toArray();
@@ -85,7 +109,7 @@ async function run(){
 
 
 
-        app.put('/user/admin/:email',verifyJWT, async (req, res) => {
+        app.put('/user/admin/:email',verifyJWT,verifyAdmin, async (req, res) => {
             const email = req.params.email;
             const requester =req.decoded.email;
             const requetserAccount = await userCollection.findOne({email:requester});
@@ -162,10 +186,7 @@ async function run(){
         })
 
 
-        app.get('/parts', async (req, res) => {
-            const parts = await partsCollection.find().toArray();
-            res.send(parts);
-        })
+       
 
 
     }
