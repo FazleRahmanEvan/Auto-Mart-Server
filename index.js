@@ -43,6 +43,7 @@ async function run(){
         const productCollection = client.db('autoMart').collection('products');
         const orderCollection = client.db('autoMart').collection('orders');
         const userCollection = client.db('autoMart').collection('user');
+        const partsCollection = client.db('autoMart').collection('parts');
 
 
 
@@ -53,6 +54,13 @@ async function run(){
         const cursor = productCollection.find(query);
         const products = await cursor.toArray();
         res.send(products);
+        });
+
+        
+        app.post('/product',  async (req, res) => {
+            const products = req.body;
+            const result = await productCollection.insertOne(products);
+            res.send(result);
         });
 
         app.get('/product/:id', async(req,res)=>{
@@ -97,6 +105,16 @@ async function run(){
 
 
         })
+
+
+        app.get('/user/:email', async(req,res) => {
+            const email = req.params.email;
+            const users =await userCollection.findOne({email:email});
+            const isUsers = users.role === 'users';
+            res.send({users: isUsers})
+        })
+
+
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
@@ -142,6 +160,13 @@ async function run(){
             const myOrders = await cursor.toArray()
             res.send(myOrders);
         })
+
+
+        app.get('/parts', async (req, res) => {
+            const parts = await partsCollection.find().toArray();
+            res.send(parts);
+        })
+
 
     }
     finally{
