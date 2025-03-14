@@ -13,7 +13,7 @@ const port = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors());
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ucgjw.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ucgjw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -95,12 +95,10 @@ async function run() {
 
         // Check if deletion was successful
         if (result.deletedCount === 1) {
-          res
-            .status(200)
-            .json({
-              message: "Product deleted",
-              deletedCount: result.deletedCount,
-            });
+          res.status(200).json({
+            message: "Product deleted",
+            deletedCount: result.deletedCount,
+          });
         } else {
           res.status(404).json({ message: "Product not found" });
         }
