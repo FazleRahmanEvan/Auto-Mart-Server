@@ -83,10 +83,9 @@ async function run() {
       res.send(product);
     });
 
-    app.delete("/product/:id", verifyJWT, verifyAdmin, async (req, res) => {
+    app.delete("/product/:id", async (req, res) => {
       const id = req.params.id;
-      const filter = { _id: ObjectId(id) };
-      const result = await productCollection.deleteOne(filter);
+      const result = await collection.deleteOne({ _id: ObjectId(id) });
       res.send(result);
     });
 
