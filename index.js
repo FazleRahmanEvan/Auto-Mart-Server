@@ -85,21 +85,48 @@ async function run() {
 
     app.delete("/product/:id", async (req, res) => {
       try {
-        const id = new ObjectId(req.params.id);
-        const result = await collection.deleteOne({ _id: id });
+        const id = req.params.id;
+        // Ensure the id is a valid ObjectId before querying
+        if (!ObjectId.isValid(id)) {
+          return res.status(400).json({ message: "Invalid product ID" });
+        }
 
+        const result = await collection.deleteOne({ _id: new ObjectId(id) });
+
+        // Check if deletion was successful
         if (result.deletedCount === 1) {
-          res.json({ success: true, deletedCount: 1 });
-        } else {
           res
-            .status(404)
-            .json({ success: false, message: "Product not found" });
+            .status(200)
+            .json({
+              message: "Product deleted",
+              deletedCount: result.deletedCount,
+            });
+        } else {
+          res.status(404).json({ message: "Product not found" });
         }
       } catch (error) {
-        console.error("Delete error:", error);
-        res.status(500).json({ success: false, message: "Server error" });
+        console.error("Error deleting product:", error);
+        res.status(500).json({ message: "Internal server error" });
       }
     });
+
+    // app.delete("/product/:id", async (req, res) => {
+    //   try {
+    //     const id = new ObjectId(req.params.id);
+    //     const result = await collection.deleteOne({ _id: id });
+
+    //     if (result.deletedCount === 1) {
+    //       res.json({ success: true, deletedCount: 1 });
+    //     } else {
+    //       res
+    //         .status(404)
+    //         .json({ success: false, message: "Product not found" });
+    //     }
+    //   } catch (error) {
+    //     console.error("Delete error:", error);
+    //     res.status(500).json({ success: false, message: "Server error" });
+    //   }
+    // });
 
     app.post("/review", async (req, res) => {
       const query = req.body;
