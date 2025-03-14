@@ -85,22 +85,19 @@ async function run() {
 
     app.delete("/product/:id", async (req, res) => {
       try {
-        const id = req.params.id;
-        const result = await collection.deleteOne({ _id: new ObjectId(id) });
+        const id = new ObjectId(req.params.id);
+        const result = await collection.deleteOne({ _id: id });
 
-        if (result.deletedCount > 0) {
-          res
-            .status(200)
-            .json({
-              message: "Product deleted",
-              deletedCount: result.deletedCount,
-            });
+        if (result.deletedCount === 1) {
+          res.json({ success: true, deletedCount: 1 });
         } else {
-          res.status(404).json({ message: "Product not found" });
+          res
+            .status(404)
+            .json({ success: false, message: "Product not found" });
         }
       } catch (error) {
-        console.error("Delete Error:", error);
-        res.status(500).json({ message: "Internal Server Error" });
+        console.error("Delete error:", error);
+        res.status(500).json({ success: false, message: "Server error" });
       }
     });
 
