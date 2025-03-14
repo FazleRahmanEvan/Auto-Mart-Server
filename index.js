@@ -65,11 +65,6 @@ async function run() {
       res.send(products);
     });
 
-    app.get("/product/add", async (req, res) => {
-      const parts = await partsCollection.find().toArray();
-      res.send(parts);
-    });
-
     app.post("/product", verifyJWT, verifyAdmin, async (req, res) => {
       const products = req.body;
       const result = await productCollection.insertOne(products);
@@ -83,49 +78,37 @@ async function run() {
       res.send(product);
     });
 
-    app.delete("/product/:id", async (req, res) => {
+    app.delete("/product/:id", verifyJWT, verifyAdmin, async (req, res) => {
       try {
-        const id = req.params.id;
-        // Ensure the id is a valid ObjectId before querying
+        const id = req.params.id; // Get product ID from the request parameter
+
+        // Check if the id is valid
         if (!ObjectId.isValid(id)) {
           return res.status(400).json({ message: "Invalid product ID" });
         }
 
-        const result = await collection.deleteOne({ _id: new ObjectId(id) });
+        const query = { _id: new ObjectId(id) }; // MongoDB query to find product by _id
 
-        // Check if deletion was successful
-        if (result.deletedCount === 1) {
-          res.status(200).json({
-            message: "Product deleted",
+        // Delete the product
+        const result = await productCollection.deleteOne(query);
+
+        // If no product is deleted, it means the product was not found
+        if (result.deletedCount === 0) {
+          return res.status(404).json({ message: "Product not found" });
+        }
+
+        // If product is deleted, send success response
+        res
+          .status(200)
+          .json({
+            message: "Product deleted successfully",
             deletedCount: result.deletedCount,
           });
-        } else {
-          res.status(404).json({ message: "Product not found" });
-        }
       } catch (error) {
         console.error("Error deleting product:", error);
         res.status(500).json({ message: "Internal server error" });
       }
     });
-
-    // app.delete("/product/:id", async (req, res) => {
-    //   try {
-    //     const id = new ObjectId(req.params.id);
-    //     const result = await collection.deleteOne({ _id: id });
-
-    //     if (result.deletedCount === 1) {
-    //       res.json({ success: true, deletedCount: 1 });
-    //     } else {
-    //       res
-    //         .status(404)
-    //         .json({ success: false, message: "Product not found" });
-    //     }
-    //   } catch (error) {
-    //     console.error("Delete error:", error);
-    //     res.status(500).json({ success: false, message: "Server error" });
-    //   }
-    // });
-
     app.post("/review", async (req, res) => {
       const query = req.body;
       const review = await reviewCollection.insertOne(query);
