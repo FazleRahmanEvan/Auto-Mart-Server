@@ -177,7 +177,10 @@ async function run(){
 
         })
 
-
+    //     const query = req.body;
+    //     const country = await countryCollection.insertOne(query);
+    //     res.send(country);
+    // });
 
         app.post('/create-payment-intent',verifyJWT, async(req,res)=>{
             const product = req.body;
@@ -248,7 +251,6 @@ async function run(){
             const myOrders = await cursor.toArray()
             res.send(myOrders);
         })
-
 
        
 
