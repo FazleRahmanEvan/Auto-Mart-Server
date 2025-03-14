@@ -84,9 +84,24 @@ async function run() {
     });
 
     app.delete("/product/:id", async (req, res) => {
-      const id = req.params.id;
-      const result = await collection.deleteOne({ _id: ObjectId(id) });
-      res.send(result);
+      try {
+        const id = req.params.id;
+        const result = await collection.deleteOne({ _id: new ObjectId(id) });
+
+        if (result.deletedCount > 0) {
+          res
+            .status(200)
+            .json({
+              message: "Product deleted",
+              deletedCount: result.deletedCount,
+            });
+        } else {
+          res.status(404).json({ message: "Product not found" });
+        }
+      } catch (error) {
+        console.error("Delete Error:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+      }
     });
 
     app.post("/review", async (req, res) => {
