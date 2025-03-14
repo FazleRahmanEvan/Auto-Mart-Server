@@ -11,13 +11,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
-app.use(
-  cors({
-    origin: "http://localhost:3000", // Change this to your frontend URL in production
-    methods: "GET,POST,PUT,PATCH,DELETE",
-    allowedHeaders: "Content-Type",
-  })
-);
+app.use(cors());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ucgjw.mongodb.net/?retryWrites=true&w=majority`;
 
